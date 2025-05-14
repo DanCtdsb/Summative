@@ -421,23 +421,42 @@ public class PrimaryController {
         imageView.setImage(writableImage);
     }
 
-    /*
-     * Accessing a pixels colors
-     * 
-     * Color color = reader.getColor(x, y);
-     * double red = color.getRed();
-     * double green = color.getGreen();
-     * double blue = color.getBlue();
-     */
+    @FXML
+    void onEmboss(ActionEvent event) {
+        int width = (int) imageView.getImage().getWidth();
+        int height = (int) imageView.getImage().getHeight();
 
-    /*
-     * Modifying a pixels colors
-     * 
-     * Color newColor = new Color(1.0 - red, 1.0 - green, 1.0 - blue,
-     * color.getOpacity());
-     */
+        WritableImage writableImage = new WritableImage(width, height);
+        PixelReader reader = imageView.getImage().getPixelReader();
+        PixelWriter writer = writableImage.getPixelWriter();
 
-    // DO NOT REMOVE THIS METHOD!
+        double[][] kernel = { { -2, -1, 0 }, { -1, 1, 1 }, { 0, 1, 2 } };
+        final int SIZE = kernel.length;
+        final int OFFSET = 0;
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                double red = 0;
+                double green = 0;
+                double blue = 0;
+                for (int kx = 0; kx < SIZE && (y + kx) < height && (x+kx) < width; kx++) {
+                    for (int ky = 0; ky < SIZE; ky++) {
+                        Color color = reader.getColor(x + kx - OFFSET, y + kx - OFFSET);
+                        red += color.getRed() * kernel[kx][ky];
+                        green += color.getGreen() * kernel[kx][ky];
+                        blue += color.getBlue() * kernel[kx][ky];
+                    }
+                }
+                double newRed = Math.max(0, Math.min(red, 1));
+                double newGreen = Math.max(0, Math.min(green, 1));
+                double newBlue = Math.max(0, Math.min(blue, 1));
+
+                Color newColor = new Color(newRed, newGreen, newBlue, 1);
+                writer.setColor(x, y, newColor);
+            }
+        }
+        imageView.setImage(writableImage);
+    }
+
     public void setStage(Stage stage) {
         this.stage = stage;
     }

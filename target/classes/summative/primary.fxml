@@ -75,6 +75,7 @@
                   <MenuItem fx:id="pixelation" mnemonicParsing="false" onAction="#onPixelation" text="Pixelation" />
                   <MenuItem fx:id="vignette" mnemonicParsing="false" onAction="#onVignette" text="Vignette" />
                   <MenuItem fx:id="edgeDetection" mnemonicParsing="false" onAction="#onEdgeDetection" text="Edge Detection" />
+                  <MenuItem fx:id="emboss" mnemonicParsing="false" onAction="#onEmboss" text="Emboss" />
               </items>
             </Menu>
       </menus>
