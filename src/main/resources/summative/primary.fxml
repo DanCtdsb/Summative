@@ -76,6 +76,7 @@
                   <MenuItem fx:id="edgeDetection" mnemonicParsing="false" onAction="#onEdgeDetection" text="Edge Detection" />
                   <MenuItem fx:id="emboss" mnemonicParsing="false" onAction="#onEmboss" text="Emboss" />
                   <MenuItem fx:id="edges" mnemonicParsing="false" onAction="#onEdges" text="Edges" />
+                  <MenuItem fx:id="boxBlur" mnemonicParsing="false" onAction="#onBoxBlur" text="Box Blur" />
               </items>
             </Menu>
       </menus>

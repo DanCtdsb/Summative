@@ -77,7 +77,9 @@ public class PrimaryController {
     private MenuItem edges;
 
     @FXML
-    private MenuItem blur;
+    private MenuItem boxBlur;
+
+    private MenuItem anaglyph;
 
 
     @FXML
@@ -426,15 +428,19 @@ public class PrimaryController {
                 double gyRed = 0;
                 double gyGreen = 0;
                 double gyBlue = 0;
-                for (int kx = 0; kx < 3 && x - 1 > 0 && x + 1 < width; kx++) {
-                    for (int ky = 0; ky < 3 && y - 1 > 0 && y + 1 < height; ky++) {
-                        Color color = reader.getColor(x + kx - 1, y + ky - 1);
-                        gxRed += color.getRed() * gx[kx][ky];
-                        gxGreen += color.getGreen() * gx[kx][ky];
-                        gxBlue += color.getBlue() * gx[kx][ky];
-                        gyRed += color.getRed() * gy[kx][ky];
-                        gyGreen += color.getGreen() * gy[kx][ky];
-                        gyBlue += color.getBlue() * gy[kx][ky];
+                for (int kx = 0; kx < 3; kx++) {
+                    for (int ky = 0; ky < 3; ky++) {
+                        if (x + kx - 1 > 0 && x + kx - 1 < width) {
+                            if (y + ky - 1 > 0 && y + ky - 1 < height) {
+                                Color color = reader.getColor(x + kx - 1, y + ky - 1);
+                                gxRed += color.getRed() * gx[kx][ky];
+                                gxGreen += color.getGreen() * gx[kx][ky];
+                                gxBlue += color.getBlue() * gx[kx][ky];
+                                gyRed += color.getRed() * gy[kx][ky];
+                                gyGreen += color.getGreen() * gy[kx][ky];
+                                gyBlue += color.getBlue() * gy[kx][ky];
+                                }
+                        }
                     }
                 }
                 double newRed = Math.min(Math.sqrt(gxRed * gxRed + gyRed * gyRed), 1);
@@ -446,7 +452,44 @@ public class PrimaryController {
         }
         imageView.setImage(writableImage);
     }
+    @FXML
+    void onBoxBlur(ActionEvent event) {
+        int width = (int) imageView.getImage().getWidth();
+        int height = (int) imageView.getImage().getHeight();
 
+        WritableImage writableImage = new WritableImage(width, height);
+        PixelReader reader = imageView.getImage().getPixelReader();
+        PixelWriter writer = writableImage.getPixelWriter();
+
+        int size = 3;
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                double red = 0;
+                double green = 0;
+                double blue = 0;
+                int count = 0;
+                for (int kx = 0; kx < size; kx++) {
+                    for (int ky = 0; ky < size; ky++) {
+                        if (x + kx - 1 > 0 && x + kx - 1 < width) {
+                            if (y + ky - 1 > 0 && y + ky - 1 < height) {
+                                Color color = reader.getColor(x + kx - 1, y + ky - 1);
+                                red += color.getRed();
+                                green += color.getGreen();
+                                blue += color.getBlue();
+                                count++;
+                            }
+                        }
+                    }
+                }
+                double newRed = Math.min(red / count, 1);
+                double newGreen = Math.min(green / count, 1);
+                double newBlue = Math.min(blue / count, 1);
+                Color newColor = new Color(newRed, newGreen, newBlue, 1);
+                writer.setColor(x, y, newColor);
+            }
+        }
+        imageView.setImage(writableImage);
+    }
     @FXML
     void onEmboss(ActionEvent event) {
         int width = (int) imageView.getImage().getWidth();
@@ -484,7 +527,7 @@ public class PrimaryController {
     }
 
     @FXML
-    void onBlur(ActionEvent event) {
+    void onAnaglyph(ActionEvent event) {
         int width = (int) imageView.getImage().getWidth();
         int height = (int) imageView.getImage().getHeight();
 
@@ -492,33 +535,22 @@ public class PrimaryController {
         PixelReader reader = imageView.getImage().getPixelReader();
         PixelWriter writer = writableImage.getPixelWriter();
 
-        double[][] kernel = { { -2, -1, 0 }, { -1, 1, 1 }, { 0, 1, 2 } };
-        final int SIZE = kernel.length;
-        final int OFFSET = 0;
+        int size = 3;
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
+                Color leftColor = reader.getColor(x, y);
                 double red = 0;
                 double green = 0;
                 double blue = 0;
-                for (int kx = 0; kx < SIZE && (y + kx) < height && (x+kx) < width; kx++) {
-                    for (int ky = 0; ky < SIZE; ky++) {
-                        Color color = reader.getColor(x + kx - OFFSET, y + kx - OFFSET);
-                        red += color.getRed() * kernel[kx][ky];
-                        green += color.getGreen() * kernel[kx][ky];
-                        blue += color.getBlue() * kernel[kx][ky];
-                    }
-                }
-                double newRed = Math.max(0, Math.min(red, 1));
-                double newGreen = Math.max(0, Math.min(green, 1));
-                double newBlue = Math.max(0, Math.min(blue, 1));
-
+                double newRed = Math.min(red, 1);
+                double newGreen = Math.min(green, 1);
+                double newBlue = Math.min(blue, 1);
                 Color newColor = new Color(newRed, newGreen, newBlue, 1);
                 writer.setColor(x, y, newColor);
             }
         }
         imageView.setImage(writableImage);
     }
-
     public void setStage(Stage stage) {
         this.stage = stage;
     }
